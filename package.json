@@ -1,0 +1,12 @@
+{
+  "name": "mangrove-arbitrage",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://peterMangrove@github.com/mangrovedao/mangrove-arbitrage.git",
+  "author": "Peter Kejlberg Madsen <peter@mangrove.exchange>",
+  "license": "MIT",
+  "dependencies": {
+    "@uniswap/v2-core": "^1.0.1",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0"
+  }
+}
