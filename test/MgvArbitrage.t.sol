@@ -54,7 +54,8 @@ contract MgvArbitrageTest is MangroveTest {
 
   function deployStrat() public {
     arbStrat = new MgvArbitrage({
-      _mgv: IMangrove($(mgv))
+      _mgv: IMangrove($(mgv)),
+      admin: address(this)
       });
     fork.set("MgvArbitrage", address(arbStrat));
 
