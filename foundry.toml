@@ -3,5 +3,10 @@ src = 'src'
 out = 'out'
 libs = ["node_modules", "lib"]
 remappings = ['@uniswap/=node_modules/@uniswap/']
+fs_permissions = [{ access = "read-write", path = "./addresses/"}, { access = "read", path = "./out/" }]
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
+
+[rpc_endpoints]
+polygon="${POLYGON_NODE_URL}"
+mumbai="${MUMBAI_NODE_URL}"

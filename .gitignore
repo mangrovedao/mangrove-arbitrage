@@ -14,3 +14,4 @@ docs/
 .env
 build
 node_modules
+addresses/.DS_Store

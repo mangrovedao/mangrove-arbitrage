@@ -1,7 +1,0 @@
-// SPDX-License-Identifier:	AGPL-3.0
-
-pragma solidity ^0.8.13;
-
-interface ILiquidityValueCalculator {
-    function computeLiquidityShareValue(uint liquidity, address tokenA, address tokenB) external returns (uint tokenAAmount, uint tokenBAmount);
-}
