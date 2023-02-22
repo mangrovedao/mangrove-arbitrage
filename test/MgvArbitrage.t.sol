@@ -36,9 +36,8 @@ contract MgvArbitrageTest is MangroveTest {
     fork.set("seller", seller);
 
     deal(taker, 10 ether);
-    deal( $(USDC), taker, cash(USDC, 20000));
     deal(seller, 10 ether);
-    deal( $(WETH), seller,cash(WETH, 10));
+
 
     vm.startPrank(taker);
     USDC.approve($(mgv), type(uint).max);
@@ -72,6 +71,8 @@ contract MgvArbitrageTest is MangroveTest {
   }
 
   function test_isProfitable() public {
+    deal( $(USDC), taker, cash(USDC, 20000)); 
+    deal( $(WETH), seller,cash(WETH, 10));
     vm.prank(seller);
     uint offerId = mgv.newOffer{value: 1 ether}({
     outbound_tkn: $(WETH),
@@ -94,7 +95,6 @@ contract MgvArbitrageTest is MangroveTest {
 
     uint usdcBalanceBefore = USDC.balanceOf(taker);
     uint wethBalanceBefore = WETH.balanceOf(taker);
-    vm.prank(taker);
     uint amountOut = arbStrat.doArbitrage( params );
     uint usdcBalanceAfter = USDC.balanceOf(taker);
     uint wethBalanceAfter = WETH.balanceOf(taker);
@@ -104,6 +104,8 @@ contract MgvArbitrageTest is MangroveTest {
   }
 
     function test_isNotProfitable() public {
+    deal( $(USDC), taker, cash(USDC, 20000));
+    deal( $(WETH), seller,cash(WETH, 10));
     vm.prank(seller);
     uint offerId = mgv.newOffer{value: 1 ether}({
     outbound_tkn: $(WETH),
@@ -124,10 +126,35 @@ contract MgvArbitrageTest is MangroveTest {
         gives:cash(WETH, 1), 
         fee: 3000 } );
 
-    vm.prank(taker);
     vm.expectRevert("Too little received");
     arbStrat.doArbitrage( params );
-    
+  }
+
+  function test_offerFailedOnMangrove() public {
+    deal( $(USDC), taker, cash(USDC, 20000));
+    vm.prank(seller);
+    uint offerId = mgv.newOffer{value: 1 ether}({
+    outbound_tkn: $(WETH),
+    inbound_tkn: $(USDC),
+    wants: cash(USDC, 1000),
+    gives: cash(WETH, 1),
+    gasreq: 50_000 ,
+    gasprice: 0,
+    pivotId: 0
+    });
+
+    ArbParams memory params = ArbParams( { 
+        taker:taker, 
+        offerId: offerId, 
+        wantsToken: $(WETH), 
+        wants: cash(USDC, 1000), 
+        givesToken:$(USDC), 
+        gives:cash(WETH, 1), 
+        fee: 3000 } );
+
+
+    vm.expectRevert("MgvArbitrage/snipeFail");
+    arbStrat.doArbitrage( params );
   }
 
 }
