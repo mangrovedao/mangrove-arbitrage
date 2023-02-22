@@ -5,8 +5,16 @@
   "repository": "https://peterMangrove@github.com/mangrovedao/mangrove-arbitrage.git",
   "author": "Peter Kejlberg Madsen <peter@mangrove.exchange>",
   "license": "MIT",
+  "scripts": {
+    "truffle:test": "truffle test",
+    "truffle:migrate": "truffle migrate"
+  },
   "dependencies": {
+    "@mangrovedao/mangrove-core": "^1.4.2",
     "@uniswap/v2-core": "^1.0.1",
-    "@uniswap/v2-periphery": "^1.1.0-beta.0"
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "dotenv": "^16.0.3",
+    "find-config": "^1.0.0",
+    "truffle": "^5.7.7"
   }
 }
