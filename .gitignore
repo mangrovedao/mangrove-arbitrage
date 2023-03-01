@@ -1,6 +1,7 @@
 # Compiler files
 cache/
 out/
+.yarn/
 
 # Ignores development broadcast logs
 !/broadcast
