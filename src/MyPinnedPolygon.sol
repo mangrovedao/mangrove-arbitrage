@@ -13,6 +13,6 @@ contract PolygonFork is GenericFork {
 
 contract PinnedPolygonFork is PolygonFork {
   constructor() {
-    BLOCK_NUMBER = 39622098;
+    BLOCK_NUMBER = 39764951;
   }
 }

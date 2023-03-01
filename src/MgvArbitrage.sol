@@ -40,6 +40,21 @@ contract MgvArbitrage is AccessControlled {
         return IERC20(token).transfer(to, amount);
     }
 
+    /// @notice This tries to snipe the offer on MGV and sell what it got on Uniswap
+    /// It reverts if it is not profitable
+    function doArbitrage(ArbParams calldata params) external onlyAdmin returns (uint256 amountOut) {
+        uint256 givesBalance = IERC20(params.takerGivesToken).balanceOf(address(this)); // Important that this is done before any tranfers
+        (uint256 takerGot, uint256 takerGave) = snipeOnMgv(params);
+        amountOut = swapOnUniswap(params, takerGot, takerGave);
+        checkGain( params.takerGivesToken, givesBalance, params.minGain);
+    }
+
+    /// @notice This tries do an initial exhange from the contracts current token, to the token need for the arbitrage, via Uniswap
+    /// Then tries to snipe the offer on MGV and sell what it got on Uniswap
+    /// At last it exchanges back to the contracts own token, via Uniswap
+    /// It reverts if it is not profitable
+    /// @param token The token need to do the arbitrage
+    /// @param fee The fee on the pool to do the inital and final exchange
     function doArbitrageExchangeOnUniswap(ArbParams calldata params, address token, uint24 fee) external onlyAdmin returns (uint256 amountOut) {
         uint256 givesBalance = IERC20(params.takerGivesToken).balanceOf(address(this)); // Important that this is done before any tranfers
         uint256 amountIn = preExchangeOnUniswap(params, token, fee);
@@ -49,6 +64,11 @@ contract MgvArbitrage is AccessControlled {
         checkGain( params.takerGivesToken, givesBalance, params.minGain);
     }
 
+    /// @notice This tries do an initial exhange from the contracts current token, to the token need for the arbitrage, via MGV
+    /// Then tries to snipe the offer on MGV and sell what it got on Uniswap
+    /// At last it exchanges back to the contracts own token, via MGV
+    /// It reverts if it is not profitable
+    /// @param token The token need to do the arbitrage
     function doArbitrageExchangeOnMgv(ArbParams calldata params, address token) external onlyAdmin returns (uint256 amountOut) {
         uint256 givesBalance = IERC20(params.takerGivesToken).balanceOf(address(this)); // Important that this is done before any tranfers
         uint256 amountIn = preExchangeOnMgv(params, token);
@@ -58,12 +78,6 @@ contract MgvArbitrage is AccessControlled {
         checkGain( params.takerGivesToken, givesBalance, params.minGain);
     }
 
-    function doArbitrage(ArbParams calldata params) external onlyAdmin returns (uint256 amountOut) {
-        uint256 givesBalance = IERC20(params.takerGivesToken).balanceOf(address(this)); // Important that this is done before any tranfers
-        (uint256 takerGot, uint256 takerGave) = snipeOnMgv(params);
-        amountOut = swapOnUniswap(params, takerGot, takerGave);
-        checkGain( params.takerGivesToken, givesBalance, params.minGain);
-    }
 
     function checkGain(address takerGivesToken, uint256 givesBalance, uint256 minGain) view internal {
         require(IERC20(takerGivesToken).balanceOf(address(this)) > givesBalance, "MgvArbitrage/notProfitable");
