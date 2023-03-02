@@ -22,7 +22,10 @@ contract MgvArbitrageDeployer is Deployer {
         ActivateMarket activateMarket = new ActivateMarket();
         address weth = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
         address dai = 0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063;
+        address usdc = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+        activateMarket.innerRun(dai, usdc, 1e9 / 1000, 1e9 / 1000, 0);
         activateMarket.innerRun(weth, dai, 1e9, 1e9 / 1000, 0);
+        activateMarket.innerRun(weth, usdc, 1e9, 1e9 / 1000, 0);
 
         
         broadcast();
