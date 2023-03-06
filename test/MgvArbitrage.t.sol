@@ -219,9 +219,9 @@ contract MgvArbitrageTest is MangroveTest {
         uint256 daiBalanceAfter = DAI.balanceOf(address(arbStrat));
         uint256 usdcBalanceAfter = USDC.balanceOf(address(arbStrat));
         uint256 wethBalanceAfter = WETH.balanceOf(address(arbStrat));
-        assertGt(usdcBalanceAfter, usdcBalanceBefore, "Should have increased usdcBalance ");
+        assertEq(usdcBalanceAfter, usdcBalanceBefore, "Should have the same usdcBalance ");
         assertEq(wethBalanceAfter, wethBalanceBefore, "Should have the same wethBalance");
-        assertEq(daiBalanceAfter, daiBalanceBefore, "Should have the same daiBalance");
+        assertGt(daiBalanceAfter, daiBalanceBefore, "Should have increased daiBalance");
         assertGt(amountOut, params.takerGives, "Amount out should be larger than the initial offer on Mangrove");
     }
 
@@ -246,7 +246,7 @@ contract MgvArbitrageTest is MangroveTest {
             takerGivesToken: $(USDC),
             takerGives: cash(USDC, 1000),
             fee: 3000,
-            minGain:cash(USDC, 1000)
+            minGain:cash(DAI, 1000)
         });
 
         vm.expectRevert("MgvArbitrage/notMinGain");
@@ -284,9 +284,9 @@ contract MgvArbitrageTest is MangroveTest {
         uint256 daiBalanceAfter = DAI.balanceOf(address(arbStrat));
         uint256 usdcBalanceAfter = USDC.balanceOf(address(arbStrat));
         uint256 wethBalanceAfter = WETH.balanceOf(address(arbStrat));
-        assertGt(usdcBalanceAfter, usdcBalanceBefore, "Should have increased usdcBalance ");
+        assertEq(usdcBalanceAfter, usdcBalanceBefore, "Should have the same usdcBalance ");
         assertEq(wethBalanceAfter, wethBalanceBefore, "Should have the same wethBalance");
-        assertEq(daiBalanceAfter, daiBalanceBefore, "Should have the same daiBalance");
+        assertGt(daiBalanceAfter, daiBalanceBefore, "Should have increased daiBalance");
         assertGt(amountOut, params.takerGives, "Amount out should be larger than the initial offer on Mangrove");
     }
 
@@ -311,7 +311,7 @@ contract MgvArbitrageTest is MangroveTest {
             takerGivesToken: $(USDC),
             takerGives: cash(USDC, 1000),
             fee: 3000,
-            minGain:cash(USDC, 1000)
+            minGain:cash(DAI, 1000)
         });
 
         vm.expectRevert("MgvArbitrage/notMinGain");

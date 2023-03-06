@@ -56,12 +56,12 @@ contract MgvArbitrage is AccessControlled {
     /// @param token The token need to do the arbitrage
     /// @param fee The fee on the pool to do the inital and final exchange
     function doArbitrageExchangeOnUniswap(ArbParams calldata params, address token, uint24 fee) external onlyAdmin returns (uint256 amountOut) {
-        uint256 givesBalance = IERC20(params.takerGivesToken).balanceOf(address(this)); // Important that this is done before any tranfers
-        uint256 amountIn = preExchangeOnUniswap(params, token, fee);
+        uint256 holdingTokenBalance = IERC20(token).balanceOf(address(this)); // Important that this is done before any tranfers
+        preExchangeOnUniswap(params, token, fee);
         (uint256 takerGot, uint256 takerGave) = snipeOnMgv(params);
         amountOut = swapOnUniswap(params, takerGot, takerGave);
-        postExchangeOnUniswap(params, token, fee, amountIn);
-        checkGain( params.takerGivesToken, givesBalance, params.minGain);
+        postExchangeOnUniswap(params, token, fee, amountOut);
+        checkGain( token, holdingTokenBalance, params.minGain);
     }
 
     /// @notice This tries do an initial exhange from the contracts current token, to the token need for the arbitrage, via MGV
@@ -70,18 +70,19 @@ contract MgvArbitrage is AccessControlled {
     /// It reverts if it is not profitable
     /// @param token The token need to do the arbitrage
     function doArbitrageExchangeOnMgv(ArbParams calldata params, address token) external onlyAdmin returns (uint256 amountOut) {
-        uint256 givesBalance = IERC20(params.takerGivesToken).balanceOf(address(this)); // Important that this is done before any tranfers
-        uint256 amountIn = preExchangeOnMgv(params, token);
+        uint256 holdingTokenBalance = IERC20(token).balanceOf(address(this)); // Important that this is done before any tranfers
+        preExchangeOnMgv(params, token);
         (uint256 takerGot, uint256 takerGave) = snipeOnMgv(params);
         amountOut = swapOnUniswap(params, takerGot, takerGave);
-        postExchangeOnMgv(params, token, amountIn);
-        checkGain( params.takerGivesToken, givesBalance, params.minGain);
+        postExchangeOnMgv(params, token, amountOut);
+        checkGain( token, holdingTokenBalance, params.minGain);
     }
 
 
     function checkGain(address takerGivesToken, uint256 givesBalance, uint256 minGain) view internal {
-        require(IERC20(takerGivesToken).balanceOf(address(this)) > givesBalance, "MgvArbitrage/notProfitable");
-        require(IERC20(takerGivesToken).balanceOf(address(this)) - givesBalance > minGain, "MgvArbitrage/notMinGain");
+        uint balance = IERC20(takerGivesToken).balanceOf(address(this));
+        require(balance > givesBalance, "MgvArbitrage/notProfitable");
+        require(balance - givesBalance > minGain, "MgvArbitrage/notMinGain");
     }
 
     function swapOnUniswap(ArbParams calldata params, uint256 takerGot, uint256 takerGave)
@@ -111,35 +112,35 @@ contract MgvArbitrage is AccessControlled {
         return (takerGot, takerGave);
     }
 
-    function postExchangeOnUniswap(ArbParams calldata params, address token, uint24 fee, uint256 amountIn) internal {
+    function postExchangeOnUniswap(ArbParams calldata params, address token, uint24 fee, uint256 amountOut) internal {
         if (token != address(0) && token != params.takerGivesToken) {
-            ISwapRouter.ExactOutputSingleParams memory exhcangeParams = ISwapRouter.ExactOutputSingleParams({
+            ISwapRouter.ExactInputSingleParams memory exhcangeParams = ISwapRouter.ExactInputSingleParams({
                 tokenIn: params.takerGivesToken,
                 tokenOut: token,
                 fee: fee,
                 recipient: address(this),
                 deadline: type(uint256).max,
-                amountOut: amountIn,
-                amountInMaximum: type(uint256).max,
+                amountIn: amountOut,
+                amountOutMinimum: 0,
                 sqrtPriceLimitX96: 0
             });
-            router.exactOutputSingle(exhcangeParams);
+            router.exactInputSingle(exhcangeParams);
         }
     }
 
-    function postExchangeOnMgv(ArbParams calldata params, address token, uint256 amountIn)
+    function postExchangeOnMgv(ArbParams calldata params, address token, uint256 amountOut)
         internal
         returns (uint256)
     {
         if (token != address(0) && token != params.takerGivesToken) {
-            (uint256 takerGot,,,) = mgv.marketOrder({
+            (, uint takerGave,,) = mgv.marketOrder({
                 outbound_tkn: token,
                 inbound_tkn: params.takerGivesToken,
-                takerWants: amountIn,
-                takerGives: type(uint160).max,
-                fillWants: true
+                takerWants: 0,
+                takerGives: amountOut,
+                fillWants: false
             });
-            require(takerGot == amountIn, "MgvArbitrage/notEnoughOnMgv");
+            require(takerGave == amountOut, "MgvArbitrage/notEnoughOnMgv");
         }
         return 0;
     }
