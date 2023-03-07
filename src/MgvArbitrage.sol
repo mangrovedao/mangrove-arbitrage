@@ -6,12 +6,14 @@ import {IMangrove} from "mgv_src/IMangrove.sol";
 import {IERC20} from "mgv_src/MgvLib.sol";
 import {AccessControlled} from "mgv_src/strategies/utils/AccessControlled.sol";
 
-enum Exchange {
-    MANGROVE,
-    UNISWAP,
-    NONE
-}
 
+/// @param offerId The offer to be arbtraged
+/// @param takerWantsToken The token the taker wants
+/// @param takerWants The amount the taker wants
+/// @param takerGivesToken The token the taker gives
+/// @param takerGives The amount the taker gives
+/// @param fee The fee used for the swap on Uniswap
+/// @param minGain The minimum amount the abtriage needs to gain
 struct ArbParams {
     uint256 offerId;
     address takerWantsToken;
@@ -22,20 +24,24 @@ struct ArbParams {
     uint256 minGain;
 }
 
-
 contract MgvArbitrage is AccessControlled {
     IMangrove mgv;
 
+    /// @param _mgv The Mangrove instance to be arbitraged
+    /// @param admin The admin of the contract. The only address allow to use the arbitrage functions.
     constructor(IMangrove _mgv, address admin) AccessControlled(admin) {
         mgv = _mgv;
     }
 
+    /// @notice The router used to do the swap on Uniswap
     ISwapRouter router = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
     receive() external payable virtual {}
 
-    uint256 public MAX_GASREQ = 350000;
-
+    /// @notice This enables the admin to withdraw tokens from the contract.
+    /// @param token The token to be withdrawn
+    /// @param amount The amount to be withdrawn
+    /// @param to The addrress the amount should be transferred to. 
     function withdrawToken(address token, uint256 amount, address to) external onlyAdmin returns (bool) {
         return IERC20(token).transfer(to, amount);
     }
@@ -78,13 +84,16 @@ contract MgvArbitrage is AccessControlled {
         checkGain( token, holdingTokenBalance, params.minGain);
     }
 
-
+    /// @notice This checks wether the gain has been positive and if the meets the minGain
     function checkGain(address takerGivesToken, uint256 givesBalance, uint256 minGain) view internal {
         uint balance = IERC20(takerGivesToken).balanceOf(address(this));
         require(balance > givesBalance, "MgvArbitrage/notProfitable");
         require(balance - givesBalance > minGain, "MgvArbitrage/notMinGain");
     }
 
+    /// @notice This swaps the opposite of the Mangrove offer. 
+    /// @param takerGot the amount the taker got from Mangrove
+    /// @param takerGave the amount the taker gave to Mangrove 
     function swapOnUniswap(ArbParams calldata params, uint256 takerGot, uint256 takerGave)
         internal
         returns (uint256 amountOut)
@@ -103,6 +112,7 @@ contract MgvArbitrage is AccessControlled {
         require(amountOut >= takerGave, "MgvArbitrage/notProfitable");
     }
 
+    /// @notice This snipes the specified offer on Mangrove 
     function snipeOnMgv(ArbParams calldata params) internal returns (uint256, uint256) {
         uint256[4][] memory targets = new uint[4][](1);
         targets[0] = [params.offerId, params.takerWants, params.takerGives, type(uint256).max];
@@ -112,6 +122,10 @@ contract MgvArbitrage is AccessControlled {
         return (takerGot, takerGave);
     }
 
+    /// @notice this exchanges, on Uniswap, from the token the contract gain from the arbitrage, to the token the contract is holding
+    /// @param token the token the contract is holding
+    /// @param fee the fee used for the swap on Uniswap
+    /// @param amountOut The amount received from the arbitrage
     function postExchangeOnUniswap(ArbParams calldata params, address token, uint24 fee, uint256 amountOut) internal {
         if (token != address(0) && token != params.takerGivesToken) {
             ISwapRouter.ExactInputSingleParams memory exhcangeParams = ISwapRouter.ExactInputSingleParams({
@@ -128,6 +142,9 @@ contract MgvArbitrage is AccessControlled {
         }
     }
 
+    /// @notice this exchanges, on Mangrove, from the token the contract gain from the arbitrage, to the token the contract is holding
+    /// @param token the token the contract is holding
+    /// @param amountOut The amount received from the arbitrage
     function postExchangeOnMgv(ArbParams calldata params, address token, uint256 amountOut)
         internal
         returns (uint256)
@@ -145,6 +162,9 @@ contract MgvArbitrage is AccessControlled {
         return 0;
     }
 
+    /// @notice this exchanges, on Uniswap, from the token the contract is holding, to the token the contract needs for the arbitrage
+    /// @param token the token the contract is holding
+    /// @param fee the fee used for the swap on Uniswap
     function preExchangeOnUniswap(ArbParams calldata params, address token, uint24 fee) internal returns (uint256) {
         if (token != address(0) && token != params.takerGivesToken) {
             ISwapRouter.ExactOutputSingleParams memory exhcangeParams = ISwapRouter.ExactOutputSingleParams({
@@ -162,6 +182,8 @@ contract MgvArbitrage is AccessControlled {
         return 0;
     }
 
+    /// @notice this exchanges, on Mangrove, from the token the contract is holding, to the token the contract need for the arbitrage
+    /// @param token the token the contract is holding
     function preExchangeOnMgv(ArbParams calldata params, address token) internal returns (uint256) {
         if (token != address(0) && token != params.takerGivesToken) {
             (uint256 takerGot, uint256 takerGave,,) = mgv.marketOrder({
@@ -177,6 +199,7 @@ contract MgvArbitrage is AccessControlled {
         return 0;
     }
 
+    /// @notice This approves all the neccesary tokens on Mangrove and the Uniswap router
     function activateTokens(IERC20[] calldata tokens) external onlyAdmin {
         for (uint256 i = 0; i < tokens.length; ++i) {
             tokens[i].approve(address(mgv), type(uint256).max);
