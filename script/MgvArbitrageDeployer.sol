@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Deployer} from "mgv_script/lib/Deployer.sol";
 import {MangroveDeployer} from "mgv_script/MangroveDeployer.s.sol";
+import {MangroveOrderDeployer} from "mgv_script/strategies/MangroveOrderDeployer.s.sol";
 import {ActivateMarket} from "mgv_script/ActivateMarket.s.sol";
 import {MgvArbitrage} from "src/MgvArbitrage.sol";
 import {IMangrove} from "mgv_src/IMangrove.sol";
@@ -27,6 +28,9 @@ contract MgvArbitrageDeployer is Deployer {
         activateMarket.innerRun(weth, dai, 1e9, 1e9 / 1000, 0);
         activateMarket.innerRun(weth, usdc, 1e9, 1e9 / 1000, 0);
 
+
+        MangroveOrderDeployer mgoeDeployer = new MangroveOrderDeployer();
+        mgoeDeployer.innerRun({admin: admin, mangrove: mgv});
         
         broadcast();
         MgvArbitrage mgvArb = new MgvArbitrage(IMangrove(payable(mgv)), admin);
