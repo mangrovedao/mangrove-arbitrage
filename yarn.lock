@@ -3,9 +3,9 @@
 
 
 "@mangrovedao/mangrove-core@^1.4.2":
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/@mangrovedao/mangrove-core/-/mangrove-core-1.4.2.tgz#b995f886dcdaaaeeb8ca675e73a3a3e25dc4d74b"
-  integrity sha512-JvVpbqSnwEMvuYRVNDz2EFXZAYlVB/QQ5gjO/upHiFLl24Jo0B7k6aL6HFuwtw1v/2BqeMafpE7LsRKDgquv5Q==
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@mangrovedao/mangrove-core/-/mangrove-core-1.4.3.tgz#d95f9089caac4f7c09b364fbd71caedf9f5b7ff6"
+  integrity sha512-xmcX5AWTbHM3MU+bRI5in86VXDocsf+u9QB9uTu+Fkpj8lG4szxCFhcv4nrIwlVVJKuu+8FcRv8N8cSlEJ4R7Q==
 
 "@openzeppelin/contracts@3.4.2-solc-0.7":
   version "3.4.2-solc-0.7"

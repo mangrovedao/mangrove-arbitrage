@@ -28,7 +28,7 @@ contract MgvArbitrage is AccessControlled {
     IMangrove mgv;
 
     /// @param _mgv The Mangrove instance to be arbitraged
-    /// @param admin The admin of the contract. The only address allow to use the arbitrage functions.
+    /// @param admin The admin of the contract. The only address allowed to use the arbitrage functions.
     constructor(IMangrove _mgv, address admin) AccessControlled(admin) {
         mgv = _mgv;
     }
