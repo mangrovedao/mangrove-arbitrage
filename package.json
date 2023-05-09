@@ -2,8 +2,7 @@
   "name": "mangrove-arbitrage",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://peterMangrove@github.com/mangrovedao/mangrove-arbitrage.git",
-  "author": "Peter Kejlberg Madsen <peter@mangrove.exchange>",
+  "author": "Mangrove DAO",
   "license": "MIT",
   "dependencies": {
     "@mangrovedao/mangrove-core": "1.4.6-2",
