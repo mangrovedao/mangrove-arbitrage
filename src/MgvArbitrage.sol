@@ -6,13 +6,13 @@ import {IMangrove} from "mgv_src/IMangrove.sol";
 import {IERC20} from "mgv_src/MgvLib.sol";
 import {AccessControlled} from "mgv_src/strategies/utils/AccessControlled.sol";
 
-/// @param offerId The offer to be arbtraged
+/// @param offerId The offer to be arbitraged
 /// @param takerWantsToken The token the taker wants
 /// @param takerWants The amount the taker wants
 /// @param takerGivesToken The token the taker gives
 /// @param takerGives The amount the taker gives
 /// @param fee The fee used for the swap on Uniswap
-/// @param minGain The minimum amount the abtriage needs to gain
+/// @param minGain The minimum amount the arbitrage needs to gain
 struct ArbParams {
   uint offerId;
   address takerWantsToken;
@@ -40,7 +40,7 @@ contract MgvArbitrage is AccessControlled {
   /// @notice This enables the admin to withdraw tokens from the contract.
   /// @param token The token to be withdrawn
   /// @param amount The amount to be withdrawn
-  /// @param to The addrress the amount should be transferred to.
+  /// @param to The address the amount should be transferred to.
   function withdrawToken(address token, uint amount, address to) external onlyAdmin returns (bool) {
     return IERC20(token).transfer(to, amount);
   }
@@ -54,12 +54,12 @@ contract MgvArbitrage is AccessControlled {
     checkGain(params.takerGivesToken, givesBalance, params.minGain);
   }
 
-  /// @notice This tries do an initial exhange from the contracts current token, to the token need for the arbitrage, via Uniswap
+  /// @notice This tries do an initial exchange from the contracts current token, to the token need for the arbitrage, via Uniswap
   /// Then tries to snipe the offer on MGV and sell what it got on Uniswap
   /// At last it exchanges back to the contracts own token, via Uniswap
   /// It reverts if it is not profitable
   /// @param token The token need to do the arbitrage
-  /// @param fee The fee on the pool to do the inital and final exchange
+  /// @param fee The fee on the pool to do the initial and final exchange
   function doArbitrageExchangeOnUniswap(ArbParams calldata params, address token, uint24 fee)
     external
     onlyAdmin
@@ -73,7 +73,7 @@ contract MgvArbitrage is AccessControlled {
     checkGain(token, holdingTokenBalance, params.minGain);
   }
 
-  /// @notice This tries do an initial exhange from the contracts current token, to the token need for the arbitrage, via MGV
+  /// @notice This tries do an initial exchange from the contracts current token, to the token need for the arbitrage, via MGV
   /// Then tries to snipe the offer on MGV and sell what it got on Uniswap
   /// At last it exchanges back to the contracts own token, via MGV
   /// It reverts if it is not profitable
@@ -132,7 +132,7 @@ contract MgvArbitrage is AccessControlled {
   /// @param amountOut The amount received from the arbitrage
   function postExchangeOnUniswap(ArbParams calldata params, address token, uint24 fee, uint amountOut) internal {
     if (token != address(0) && token != params.takerGivesToken) {
-      ISwapRouter.ExactInputSingleParams memory exhcangeParams = ISwapRouter.ExactInputSingleParams({
+      ISwapRouter.ExactInputSingleParams memory exchangeParams = ISwapRouter.ExactInputSingleParams({
         tokenIn: params.takerGivesToken,
         tokenOut: token,
         fee: fee,
@@ -142,7 +142,7 @@ contract MgvArbitrage is AccessControlled {
         amountOutMinimum: 0,
         sqrtPriceLimitX96: 0
       });
-      router.exactInputSingle(exhcangeParams);
+      router.exactInputSingle(exchangeParams);
     }
   }
 
@@ -168,7 +168,7 @@ contract MgvArbitrage is AccessControlled {
   /// @param fee the fee used for the swap on Uniswap
   function preExchangeOnUniswap(ArbParams calldata params, address token, uint24 fee) internal returns (uint) {
     if (token != address(0) && token != params.takerGivesToken) {
-      ISwapRouter.ExactOutputSingleParams memory exhcangeParams = ISwapRouter.ExactOutputSingleParams({
+      ISwapRouter.ExactOutputSingleParams memory exchangeParams = ISwapRouter.ExactOutputSingleParams({
         tokenIn: token,
         tokenOut: params.takerGivesToken,
         fee: fee,
@@ -178,7 +178,7 @@ contract MgvArbitrage is AccessControlled {
         amountInMaximum: IERC20(token).balanceOf(address(this)),
         sqrtPriceLimitX96: 0
       });
-      return router.exactOutputSingle(exhcangeParams);
+      return router.exactOutputSingle(exchangeParams);
     }
     return 0;
   }
@@ -200,7 +200,7 @@ contract MgvArbitrage is AccessControlled {
     return 0;
   }
 
-  /// @notice This approves all the neccesary tokens on Mangrove and the Uniswap router
+  /// @notice This approves all the necessary tokens on Mangrove and the Uniswap router
   function activateTokens(IERC20[] calldata tokens) external onlyAdmin {
     for (uint i = 0; i < tokens.length; ++i) {
       tokens[i].approve(address(mgv), type(uint).max);

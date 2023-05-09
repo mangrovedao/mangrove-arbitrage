@@ -187,7 +187,7 @@ contract MgvArbitrageTest is MangroveTest {
     arbStrat.doArbitrage(params);
   }
 
-  function test_isProfitable_exchangeDaiCurreny_Uniswap() public {
+  function test_isProfitable_exchangeDaiCurrency_Uniswap() public {
     deal($(DAI), address(arbStrat), cash(DAI, 2000));
     deal($(WETH), seller, cash(WETH, 10));
     vm.prank(seller);
@@ -224,7 +224,7 @@ contract MgvArbitrageTest is MangroveTest {
     assertGt(amountOut, params.takerGives, "Amount out should be larger than the initial offer on Mangrove");
   }
 
-  function test_isNotProfitable_exchangeDaiCurreny_Uniswap() public {
+  function test_isNotProfitable_exchangeDaiCurrency_Uniswap() public {
     deal($(DAI), address(arbStrat), cash(DAI, 2000));
     deal($(WETH), seller, cash(WETH, 10));
     vm.prank(seller);
@@ -252,7 +252,7 @@ contract MgvArbitrageTest is MangroveTest {
     arbStrat.doArbitrageExchangeOnUniswap(params, address(DAI), 100);
   }
 
-  function test_isProfitable_exchangeDaiCurreny_Mgv() public {
+  function test_isProfitable_exchangeDaiCurrency_Mgv() public {
     deal($(DAI), address(arbStrat), cash(DAI, 2000));
     deal($(WETH), seller, cash(WETH, 10));
     vm.prank(seller);
@@ -289,7 +289,7 @@ contract MgvArbitrageTest is MangroveTest {
     assertGt(amountOut, params.takerGives, "Amount out should be larger than the initial offer on Mangrove");
   }
 
-  function test_isNotProfitable_exchangeDaiCurreny_Mgv() public {
+  function test_isNotProfitable_exchangeDaiCurrency_Mgv() public {
     deal($(DAI), address(arbStrat), cash(DAI, 2000));
     deal($(WETH), seller, cash(WETH, 10));
     vm.prank(seller);

@@ -1,7 +1,7 @@
 # mangrove-arbitrage
 
 This is a repo for an arbitrage contract, that can execute arbitrage between Uniswap and Mangrove.
-It can either do the arbitrage directly, or it can try and git the need token, if the contract does not have enough liquidity.
+It can either do the arbitrage directly, or it can try and get the needed token, if the contract does not have enough liquidity.
 
 ## How to use
 
