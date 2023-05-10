@@ -115,7 +115,6 @@ jobs:
         cache: 'yarn'
         
     - run: yarn install --immutable
-      working-directory: . # Yarn must run in root to ensure monorepo setup
 
     - name: Foundry Setup
       uses: ./.github/actions/foundry-setup
@@ -137,10 +136,9 @@ jobs:
         MUMBAI_NODE_URL: ${{ secrets.MUMBAI_NODE_URL }}
 
     # For push runs we also create a coverage report
-    - name: Create coverage report for mangrove-solidity
+    - name: Create coverage report
       if: github.event_name != 'pull_request_target' 
       run: forge coverage --report lcov
-      working-directory: . # coverage cannot find contracts if executed inside mangrove-solidity
       env:
         POLYGON_NODE_URL: ${{ secrets.POLYGON_NODE_URL }}
         MUMBAI_NODE_URL: ${{ secrets.MUMBAI_NODE_URL }}
@@ -153,7 +151,7 @@ jobs:
       if: github.event_name != 'pull_request_target' 
       run: echo "::set-output name=sha_for_head::$(git rev-parse HEAD)"
 
-    - name: Upload to Coveralls for mangrove-solidity
+    - name: Upload to Coveralls
       uses: coverallsapp/github-action@master
       if: github.event_name != 'pull_request_target' 
       with:
