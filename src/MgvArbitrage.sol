@@ -44,7 +44,7 @@ contract MgvArbitrage is AccessControlled {
   /// @param to The address the amount should be transferred to.
   /// @return true if transfer was successful; otherwise, false.
   function withdrawToken(address token, uint amount, address to) external onlyAdmin returns (bool) {
-    return TransferLib.transferToken(token, to, amount);
+    return TransferLib.transferToken(IERC20(token), to, amount);
   }
 
   /// @notice This tries to snipe the offer on MGV and sell what it got on Uniswap
