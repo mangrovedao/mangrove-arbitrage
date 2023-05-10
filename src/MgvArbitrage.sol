@@ -58,7 +58,7 @@ contract MgvArbitrage is AccessControlled {
     checkGain(params.takerGivesToken, givesBalance, params.minGain);
   }
 
-  /// @notice This tries do an initial exchange from the contract's current token, to the token needed for the arbitrage, via Uniswap
+  /// @notice This tries do an initial exchange from a token that the contract is holding, to the token needed for the arbitrage, via Uniswap
   /// Then tries to snipe the offer on Mangrove and sell what it got on Uniswap
   /// At last it exchanges back to the contracts own token, via Uniswap
   /// It reverts if it is not profitable
@@ -79,7 +79,7 @@ contract MgvArbitrage is AccessControlled {
     checkGain(token, holdingTokenBalance, params.minGain);
   }
 
-  /// @notice This tries do an initial exchange from the contract's current token, to the token needed for the arbitrage, via Mangrove
+  /// @notice This tries do an initial exchange from a token that the contract is holding, to the token needed for the arbitrage, via Mangrove
   /// Then tries to snipe the offer on Mangrove and sell what it got on Uniswap
   /// At last it exchanges back to the contracts own token, via Mangrove
   /// It reverts if it is not profitable
