@@ -47,6 +47,14 @@ contract MgvArbitrage is AccessControlled {
     return TransferLib.transferToken(IERC20(token), to, amount);
   }
 
+  /// @notice This enables the admin to withdraw native tokens from the contract.
+  /// @param amount The amount to be withdrawn
+  /// @param to The address the amount should be transferred to.
+  /// @return success true if transfer was successful; otherwise, false.
+  function withdrawNative(uint amount, address to) external onlyAdmin returns (bool success) {
+    (success,) = to.call{value: amount}("");
+  }
+
   /// @notice This tries to snipe the offer on Mangrove and sell what it got on Uniswap
   /// It reverts if it is not profitable
   /// @param params The parameters needed to do the arbitrage
@@ -167,7 +175,7 @@ contract MgvArbitrage is AccessControlled {
   /// @param params The parameters needed to do the arbitrage
   /// @param token the token the contract is holding
   /// @param amountOut The amount received from the arbitrage
-  function postExchangeOnMgv(ArbParams calldata params, address token, uint amountOut) internal  {
+  function postExchangeOnMgv(ArbParams calldata params, address token, uint amountOut) internal {
     if (token != address(0) && token != params.takerGivesToken) {
       (, uint takerGave,,) = mgv.marketOrder({
         outbound_tkn: token,
