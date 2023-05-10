@@ -47,7 +47,7 @@ contract MgvArbitrage is AccessControlled {
     return TransferLib.transferToken(IERC20(token), to, amount);
   }
 
-  /// @notice This tries to snipe the offer on MGV and sell what it got on Uniswap
+  /// @notice This tries to snipe the offer on Mangrove and sell what it got on Uniswap
   /// It reverts if it is not profitable
   /// @param params The parameters needed to do the arbitrage
   /// @return amountOut The amount received from Uniswap
@@ -59,7 +59,7 @@ contract MgvArbitrage is AccessControlled {
   }
 
   /// @notice This tries do an initial exchange from the contract's current token, to the token needed for the arbitrage, via Uniswap
-  /// Then tries to snipe the offer on MGV and sell what it got on Uniswap
+  /// Then tries to snipe the offer on Mangrove and sell what it got on Uniswap
   /// At last it exchanges back to the contracts own token, via Uniswap
   /// It reverts if it is not profitable
   /// @param token The token needed to do the arbitrage
@@ -79,9 +79,9 @@ contract MgvArbitrage is AccessControlled {
     checkGain(token, holdingTokenBalance, params.minGain);
   }
 
-  /// @notice This tries do an initial exchange from the contract's current token, to the token needed for the arbitrage, via MGV
-  /// Then tries to snipe the offer on MGV and sell what it got on Uniswap
-  /// At last it exchanges back to the contracts own token, via MGV
+  /// @notice This tries do an initial exchange from the contract's current token, to the token needed for the arbitrage, via Mangrove
+  /// Then tries to snipe the offer on Mangrove and sell what it got on Uniswap
+  /// At last it exchanges back to the contracts own token, via Mangrove
   /// It reverts if it is not profitable
   /// @param token The token needed to do the arbitrage
   /// @param params The parameters needed to do the arbitrage
