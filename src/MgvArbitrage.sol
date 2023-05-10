@@ -5,6 +5,7 @@ import {ISwapRouter} from "@uniswap/v3-periphery/contracts/interfaces/ISwapRoute
 import {IMangrove} from "mgv_src/IMangrove.sol";
 import {IERC20} from "mgv_src/MgvLib.sol";
 import {AccessControlled} from "mgv_src/strategies/utils/AccessControlled.sol";
+import {TransferLib} from "mgv_src/strategies/utils/TransferLib.sol";
 
 /// @param offerId The offer to be arbitraged
 /// @param takerWantsToken The token the taker wants
@@ -41,8 +42,9 @@ contract MgvArbitrage is AccessControlled {
   /// @param token The token to be withdrawn
   /// @param amount The amount to be withdrawn
   /// @param to The address the amount should be transferred to.
+  /// @return true if transfer was successful; otherwise, false.
   function withdrawToken(address token, uint amount, address to) external onlyAdmin returns (bool) {
-    return IERC20(token).transfer(to, amount);
+    return TransferLib.transferToken(token, to, amount);
   }
 
   /// @notice This tries to snipe the offer on MGV and sell what it got on Uniswap
@@ -54,11 +56,11 @@ contract MgvArbitrage is AccessControlled {
     checkGain(params.takerGivesToken, givesBalance, params.minGain);
   }
 
-  /// @notice This tries do an initial exchange from the contracts current token, to the token need for the arbitrage, via Uniswap
+  /// @notice This tries do an initial exchange from the contract's current token, to the token needed for the arbitrage, via Uniswap
   /// Then tries to snipe the offer on MGV and sell what it got on Uniswap
   /// At last it exchanges back to the contracts own token, via Uniswap
   /// It reverts if it is not profitable
-  /// @param token The token need to do the arbitrage
+  /// @param token The token needed to do the arbitrage
   /// @param fee The fee on the pool to do the initial and final exchange
   function doArbitrageExchangeOnUniswap(ArbParams calldata params, address token, uint24 fee)
     external
@@ -73,11 +75,11 @@ contract MgvArbitrage is AccessControlled {
     checkGain(token, holdingTokenBalance, params.minGain);
   }
 
-  /// @notice This tries do an initial exchange from the contracts current token, to the token need for the arbitrage, via MGV
+  /// @notice This tries do an initial exchange from the contract's current token, to the token needed for the arbitrage, via MGV
   /// Then tries to snipe the offer on MGV and sell what it got on Uniswap
   /// At last it exchanges back to the contracts own token, via MGV
   /// It reverts if it is not profitable
-  /// @param token The token need to do the arbitrage
+  /// @param token The token needed to do the arbitrage
   function doArbitrageExchangeOnMgv(ArbParams calldata params, address token)
     external
     onlyAdmin
@@ -203,8 +205,8 @@ contract MgvArbitrage is AccessControlled {
   /// @notice This approves all the necessary tokens on Mangrove and the Uniswap router
   function activateTokens(IERC20[] calldata tokens) external onlyAdmin {
     for (uint i = 0; i < tokens.length; ++i) {
-      tokens[i].approve(address(mgv), type(uint).max);
-      tokens[i].approve(address(router), type(uint).max);
+      TransferLib.approveToken(tokens[i], address(mgv), type(uint).max);
+      TransferLib.approveToken(tokens[i], address(router), type(uint).max);
     }
   }
 }
