@@ -47,6 +47,7 @@ contract MgvArbitrage is AccessControlled {
     return TransferLib.transferToken(IERC20(token), to, amount);
   }
 
+
   /// @notice This enables the admin to withdraw native tokens from the contract.
   /// @param amount The amount to be withdrawn
   /// @param to The address the amount should be transferred to.
