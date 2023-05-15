@@ -317,14 +317,18 @@ contract MgvArbitrageTest is MangroveTest {
     arbStrat.doArbitrageExchangeOnMgv(params, address(DAI));
   }
 
+  function test_canWithdrawToken() public {
+    uint daiAmount = cash(DAI, 2000);
+    deal($(DAI), address(arbStrat), daiAmount);
+    uint sellerDaiBalance = DAI.balanceOf(address(seller));
+    arbStrat.withdrawToken($(DAI), daiAmount, address(seller));
+    assertEq(DAI.balanceOf(address(seller)) - sellerDaiBalance, daiAmount, "Should have withdrawn the DAI");
+  }
 
-    function test_canWithdraw() public {
-      uint daiAmount = cash(DAI, 2000);
-      deal($(DAI), address(arbStrat), daiAmount);
-      uint sellerDaiBalance =  DAI.balanceOf(address(seller));
-      arbStrat.withdrawToken($(DAI), daiAmount, address(seller) );
-      assertEq( DAI.balanceOf(address(seller)) - sellerDaiBalance, daiAmount, "Should have withdrawn the DAI");
-
-    }
-
+  function test_canWithdrawNative() public {
+    deal(address(arbStrat), 10 ether);
+    uint sellerNativeBalance = address(seller).balance;
+    arbStrat.withdrawNative(10 ether, address(seller));
+    assertEq(address(seller).balance - sellerNativeBalance, 10 ether, "Should have withdrawn the Native");
+  }
 }
