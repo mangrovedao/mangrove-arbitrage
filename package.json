@@ -5,19 +5,19 @@
   "author": "Mangrove DAO",
   "license": "MIT",
   "scripts": {
-    "precommit": "lint-staged",    
+    "precommit": "lint-staged",
     "postinstall": "husky install",
-    "build": "forge build",
+    "build": "forge build && node buildIndex",
     "clean": "forge clean",
     "test": "forge test -vvv"
   },
   "lint-staged": {
     "*.sol": "forge fmt",
     "*.{js,css,md,json}": "prettier --write --ignore-unknown"
-  },  
+  },
   "dependencies": {
     "husky": "^8.0.3",
-    "lint-staged": "^13.2.2",    
+    "lint-staged": "^13.2.2",
     "@mangrovedao/mangrove-core": "1.4.6-2",
     "@uniswap/swap-router-contracts": "^1.3.0",
     "@uniswap/v3-core": "^1.0.1",
