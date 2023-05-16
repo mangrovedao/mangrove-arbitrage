@@ -227,4 +227,20 @@ contract MgvArbitrage is AccessControlled {
       TransferLib.approveToken(tokens[i], address(router), type(uint).max);
     }
   }
+
+  /// @notice This checks if the contract has enough allowance on Mangrove and the Uniswap router
+  /// @param tokens The tokens to check
+  /// @return needsActivate The tokens that need to be approved
+  function needsActivateTokens(IERC20[] calldata tokens) external view returns (IERC20[] memory) {
+    IERC20[] memory needsActivate = new IERC20[](tokens.length);
+    for (uint i = 0; i < tokens.length; ++i) {
+      if (
+        tokens[i].allowance(address(this), address(mgv)) == 0
+          || tokens[i].allowance(address(this), address(router)) == 0
+      ) {
+        needsActivate[i] = tokens[i];
+      }
+    }
+    return needsActivate;
+  }
 }
