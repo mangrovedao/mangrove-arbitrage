@@ -26,11 +26,19 @@ struct ArbParams {
 
 contract MgvArbitrage is AccessControlled {
   IMangrove mgv;
+  address arbitrager;
 
   /// @param _mgv The Mangrove instance to be arbitraged
   /// @param admin The admin of the contract. The only address allowed to withdraw funds.
-  constructor(IMangrove _mgv, address admin) AccessControlled(admin) {
+  constructor(IMangrove _mgv, address admin, address _arbitrager) AccessControlled(admin) {
     mgv = _mgv;
+    arbitrager = _arbitrager;
+  }
+
+  /// @notice This modifier verifies that the `msg.sender` is the arbitrager
+  modifier onlyArbitrager() {
+    require(msg.sender == arbitrager, "Only arbitrager can call this function");
+    _;
   }
 
   /// @notice The router used to do the swap on Uniswap
@@ -38,7 +46,7 @@ contract MgvArbitrage is AccessControlled {
 
   receive() external payable virtual {}
 
-  /// @notice This enables the admin to withdraw tokens from the contract.
+  /// @notice This enables the admin to withdraw tokens from the contract. Notice that only the admin can call this.
   /// @param token The token to be withdrawn
   /// @param amount The amount to be withdrawn
   /// @param to The address the amount should be transferred to.
@@ -47,7 +55,7 @@ contract MgvArbitrage is AccessControlled {
     return TransferLib.transferToken(IERC20(token), to, amount);
   }
 
-  /// @notice This enables the admin to withdraw native tokens from the contract.
+  /// @notice This enables the admin to withdraw native tokens from the contract. Notice that only the admin can call this.
   /// @param amount The amount to be withdrawn
   /// @param to The address the amount should be transferred to.
   /// @return success true if transfer was successful; otherwise, false.
@@ -57,9 +65,10 @@ contract MgvArbitrage is AccessControlled {
 
   /// @notice This tries to snipe the offer on Mangrove and sell what it got on Uniswap
   /// It reverts if it is not profitable
+  /// It is only the arbitrager that can call this
   /// @param params The parameters needed to do the arbitrage
   /// @return amountOut The amount received from Uniswap
-  function doArbitrage(ArbParams calldata params) external returns (uint amountOut) {
+  function doArbitrage(ArbParams calldata params) external onlyArbitrager returns (uint amountOut) {
     uint givesBalance = IERC20(params.takerGivesToken).balanceOf(address(this)); // Important that this is done before any transfers
     (uint takerGot, uint takerGave) = snipeOnMgv(params);
     amountOut = swapOnUniswap(params, takerGot, takerGave);
@@ -70,12 +79,14 @@ contract MgvArbitrage is AccessControlled {
   /// Then tries to snipe the offer on Mangrove and sell what it got on Uniswap
   /// At last it exchanges back to the contracts own token, via Uniswap
   /// It reverts if it is not profitable
+  /// It is only the arbitrager that can call this
   /// @param token The token needed to do the arbitrage
   /// @param fee The fee on the pool to do the initial and final exchange
   /// @param params The parameters needed to do the arbitrage
   /// @return amountOut The amount received from Uniswap
   function doArbitrageExchangeOnUniswap(ArbParams calldata params, address token, uint24 fee)
     external
+    onlyArbitrager
     returns (uint amountOut)
   {
     uint holdingTokenBalance = IERC20(token).balanceOf(address(this)); // Important that this is done before any transfers
@@ -90,10 +101,15 @@ contract MgvArbitrage is AccessControlled {
   /// Then tries to snipe the offer on Mangrove and sell what it got on Uniswap
   /// At last it exchanges back to the contracts own token, via Mangrove
   /// It reverts if it is not profitable
+  /// It is only the arbitrager that can call this
   /// @param token The token needed to do the arbitrage
   /// @param params The parameters needed to do the arbitrage
   /// @return amountOut The amount received from Uniswap
-  function doArbitrageExchangeOnMgv(ArbParams calldata params, address token) external returns (uint amountOut) {
+  function doArbitrageExchangeOnMgv(ArbParams calldata params, address token)
+    external
+    onlyArbitrager
+    returns (uint amountOut)
+  {
     uint holdingTokenBalance = IERC20(token).balanceOf(address(this)); // Important that this is done before any transfers
     preExchangeOnMgv(params, token);
     (uint takerGot, uint takerGave) = snipeOnMgv(params);
@@ -220,8 +236,9 @@ contract MgvArbitrage is AccessControlled {
   }
 
   /// @notice This approves all the necessary tokens on Mangrove and the Uniswap router
+  /// It is only the admin that can call this function
   /// @param tokens The tokens to approve
-  function activateTokens(IERC20[] calldata tokens) external {
+  function activateTokens(IERC20[] calldata tokens) external onlyAdmin {
     for (uint i = 0; i < tokens.length; ++i) {
       TransferLib.approveToken(tokens[i], address(mgv), type(uint).max);
       TransferLib.approveToken(tokens[i], address(router), type(uint).max);
