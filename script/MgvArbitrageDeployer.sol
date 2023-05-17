@@ -10,11 +10,11 @@ import {IMangrove} from "mgv_src/IMangrove.sol";
 
 contract MgvArbitrageDeployer is Deployer {
   function run() public {
-    innerRun({admin: broadcaster()});
+    innerRun({admin: broadcaster(), arbitrager: envAddressOrName("ARBITRAGER")});
     outputDeployment();
   }
 
-  function innerRun(address admin) public {
+  function innerRun(address admin, address arbitrager) public {
     MangroveDeployer mgvDeployer = new MangroveDeployer();
     mgvDeployer.innerRun({chief: admin, gasprice: 1, gasmax: 2_000_000});
     address mgv = address(mgvDeployer.mgv());
@@ -30,7 +30,7 @@ contract MgvArbitrageDeployer is Deployer {
     mgoeDeployer.innerRun({admin: admin, mangrove: mgv});
 
     broadcast();
-    MgvArbitrage mgvArb = new MgvArbitrage(IMangrove(payable(mgv)), admin, admin);
+    MgvArbitrage mgvArb = new MgvArbitrage(IMangrove(payable(mgv)), admin, arbitrager);
     fork.set("MgvArbitrage", address(mgvArb));
   }
 }
