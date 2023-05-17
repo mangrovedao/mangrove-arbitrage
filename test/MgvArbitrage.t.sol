@@ -4,7 +4,6 @@ pragma solidity ^0.8.10;
 import {MangroveTest} from "mgv_test/lib/MangroveTest.sol";
 
 import {PinnedPolygonFork} from "src/MyPinnedPolygon.sol"; // have to use ar polygon fork on a newer block
-// import {PinnedPolygonFork} from "mgv_test/lib/forks/Polygon.sol";
 import {TestToken} from "mgv_test/lib/tokens/TestToken.sol";
 import {IERC20} from "mgv_src/MgvLib.sol";
 import "src/MgvArbitrage.sol";
@@ -20,6 +19,8 @@ contract MgvArbitrageTest is MangroveTest {
   address payable seller;
   address payable lp;
 
+  IERC20[] tokens;
+
   receive() external payable virtual {}
 
   function setUp() public override {
@@ -32,6 +33,11 @@ contract MgvArbitrageTest is MangroveTest {
     DAI = IERC20(fork.get("DAI"));
     setupMarket(WETH, USDC);
     setupMarket(DAI, USDC);
+
+    tokens = new IERC20[](3);
+    tokens[0] = WETH;
+    tokens[1] = USDC;
+    tokens[2] = DAI;
 
     taker = freshAddress();
     fork.set("taker", taker);
@@ -90,15 +96,10 @@ contract MgvArbitrageTest is MangroveTest {
     vm.startPrank(taker);
     WETH.approve(address(arbStrat), type(uint).max);
     vm.stopPrank();
-    IERC20[] memory tokens = new IERC20[](3);
-    tokens[0] = WETH;
-    tokens[1] = USDC;
-    tokens[2] = DAI;
-
-    arbStrat.activateTokens(tokens);
   }
 
   function test_isProfitable() public {
+    arbStrat.activateTokens(tokens);
     deal($(USDC), address(arbStrat), cash(USDC, 20000));
     deal($(WETH), seller, cash(WETH, 10));
     vm.prank(seller);
@@ -133,6 +134,7 @@ contract MgvArbitrageTest is MangroveTest {
   }
 
   function test_isNotProfitable() public {
+    arbStrat.activateTokens(tokens);
     deal($(USDC), address(arbStrat), cash(USDC, 20000));
     deal($(WETH), seller, cash(WETH, 10));
     vm.prank(seller);
@@ -161,6 +163,7 @@ contract MgvArbitrageTest is MangroveTest {
   }
 
   function test_offerFailedOnMangrove() public {
+    arbStrat.activateTokens(tokens);
     deal($(USDC), address(arbStrat), cash(USDC, 20000));
     vm.prank(seller);
     uint offerId = mgv.newOffer{value: 1 ether}({
@@ -188,6 +191,7 @@ contract MgvArbitrageTest is MangroveTest {
   }
 
   function test_isProfitable_exchangeDaiCurrency_Uniswap() public {
+    arbStrat.activateTokens(tokens);
     deal($(DAI), address(arbStrat), cash(DAI, 2000));
     deal($(WETH), seller, cash(WETH, 10));
     vm.prank(seller);
@@ -225,6 +229,7 @@ contract MgvArbitrageTest is MangroveTest {
   }
 
   function test_isNotProfitable_exchangeDaiCurrency_Uniswap() public {
+    arbStrat.activateTokens(tokens);
     deal($(DAI), address(arbStrat), cash(DAI, 2000));
     deal($(WETH), seller, cash(WETH, 10));
     vm.prank(seller);
@@ -253,6 +258,7 @@ contract MgvArbitrageTest is MangroveTest {
   }
 
   function test_isProfitable_exchangeDaiCurrency_Mgv() public {
+    arbStrat.activateTokens(tokens);
     deal($(DAI), address(arbStrat), cash(DAI, 2000));
     deal($(WETH), seller, cash(WETH, 10));
     vm.prank(seller);
@@ -290,6 +296,7 @@ contract MgvArbitrageTest is MangroveTest {
   }
 
   function test_isNotProfitable_exchangeDaiCurrency_Mgv() public {
+    arbStrat.activateTokens(tokens);
     deal($(DAI), address(arbStrat), cash(DAI, 2000));
     deal($(WETH), seller, cash(WETH, 10));
     vm.prank(seller);
@@ -330,5 +337,18 @@ contract MgvArbitrageTest is MangroveTest {
     uint sellerNativeBalance = address(seller).balance;
     arbStrat.withdrawNative(10 ether, address(seller));
     assertEq(address(seller).balance - sellerNativeBalance, 10 ether, "Should have withdrawn the Native");
+  }
+
+  function test_needsActivateTokens() public {
+    IERC20[] memory needs = arbStrat.needsActivateTokens(tokens);
+
+    for (uint i = 0; i < needs.length; ++i) {
+      assertNot0x(address(needs[0]));
+    }
+    arbStrat.activateTokens(tokens);
+    needs = arbStrat.needsActivateTokens(tokens);
+    for (uint i = 0; i < needs.length; ++i) {
+      assertEq(address(needs[0]), address(0), "Should not need to activate tokens");
+    }
   }
 }
