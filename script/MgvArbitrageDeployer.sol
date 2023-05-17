@@ -30,7 +30,7 @@ contract MgvArbitrageDeployer is Deployer {
     mgoeDeployer.innerRun({admin: admin, mangrove: mgv});
 
     broadcast();
-    MgvArbitrage mgvArb = new MgvArbitrage(IMangrove(payable(mgv)), admin);
+    MgvArbitrage mgvArb = new MgvArbitrage(IMangrove(payable(mgv)), admin, admin);
     fork.set("MgvArbitrage", address(mgvArb));
   }
 }
