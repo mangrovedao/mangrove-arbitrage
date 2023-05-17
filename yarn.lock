@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@mangrovedao/mangrove-core@1.4.6-2":
-  version "1.4.6-2"
-  resolved "https://registry.yarnpkg.com/@mangrovedao/mangrove-core/-/mangrove-core-1.4.6-2.tgz#7bf366474a0a7cd84756395f19b9af8a42b5a456"
-  integrity sha512-5PlF3ODRZ7H+3f2tVguDMjaZ/FdG7Kv7j4ZooAi/Adt3jQXVDqjqTVNBvud1eRKrejVIMUGOvBHAUclhVbC/ag==
+"@mangrovedao/mangrove-core@^1.5.1-1":
+  version "1.5.1-1"
+  resolved "https://registry.yarnpkg.com/@mangrovedao/mangrove-core/-/mangrove-core-1.5.1-1.tgz#fbea8a47747d0f1e9c12f67ba1d6cb1ec46184c8"
+  integrity sha512-tFYPnF9SXHDMZWp2OlK1jTtFl40LwjyAVurPFIvuM0yQZvvw+LANAbd4QhZTVZWSsZZXNBVXGlnhp2yk4FFEmQ==
 
 "@openzeppelin/contracts@3.4.2-solc-0.7":
   version "3.4.2-solc-0.7"

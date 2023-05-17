@@ -25,8 +25,8 @@ struct ArbParams {
 }
 
 contract MgvArbitrage is AccessControlled {
-  IMangrove mgv;
-  address arbitrager;
+  IMangrove public mgv;
+  address public arbitrager;
 
   /// @param _mgv The Mangrove instance to be arbitraged
   /// @param admin The admin of the contract. The only address allowed to withdraw funds.
