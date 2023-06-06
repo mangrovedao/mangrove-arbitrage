@@ -1,5 +1,9 @@
 # mangrove-arbitrage
 
+**This repo is archived as it has been folded into the [mangrovedao/mangrove-bots](https://github.com/mangrovedao/mangrove-bots) repo.**
+
+-------
+
 This is a repo for an arbitrage contract, that can execute arbitrage between Uniswap and Mangrove.
 It can either do the arbitrage directly, or it can try and get the needed token, if the contract does not have enough liquidity.
 
